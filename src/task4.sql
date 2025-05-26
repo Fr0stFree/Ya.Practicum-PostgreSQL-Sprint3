@@ -26,7 +26,7 @@ BEGIN
 	END IF;
 	
 	IF p_worked_hours < 1 OR p_worked_hours > 24 THEN
-		RAISE EXCEPTION 'invalid worked hours provded; expected - 1..24, got - %', p_worked_hours;
+		RAISE EXCEPTION 'invalid worked hours provided; expected - 1..24, got - %', p_worked_hours;
 	END IF;
 	
 	_is_suspicious := p_worked_hours > 16 OR CURRENT_DATE < p_work_date OR CURRENT_DATE - p_work_date > 7;

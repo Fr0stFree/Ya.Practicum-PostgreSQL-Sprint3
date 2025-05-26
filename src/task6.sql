@@ -21,7 +21,7 @@ BEGIN
     JOIN employees AS e ON e.id = l.employee_id
     WHERE l.project_id = p_project_id
     GROUP BY e.name
-    ORDER BY total_hours DESC, COUNT(*) DESC
+    ORDER BY total_hours DESC, COUNT(DISTINCT l.work_date) DESC, RANDOM()
     LIMIT _max_employees;
 END;
 $$;
