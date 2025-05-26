@@ -31,7 +31,14 @@ BEGIN
 		RETURN;
 	END IF;
 	
-	_hours_spent := (SELECT COALESCE(SUM(work_hours), 0) FROM logs WHERE project_id = _proj.id);
+	SELECT
+		COALESCE(SUM(l.work_hours), 0),
+		COUNT(DISTINCT l.employee_id)
+	INTO
+		_hours_spent,
+		_total_contributors
+	FROM logs AS l
+	WHERE l.project_id = _proj.id;
 	
 	IF _hours_spent = 0 THEN
 		RAISE NOTICE 'project "%" is close; no time was spent', _proj.id;
@@ -44,17 +51,13 @@ BEGIN
 		RETURN;
 	END IF;
 	
-	_total_contributors = (
-		SELECT COUNT(DISTINCT e.id)
-		FROM logs AS l JOIN employees AS e ON e.id = l.employee_id
-		WHERE l.project_id = _proj.id
-	);
+	_bonus := LEAST(_max_hours_per_day, FLOOR((_proj.estimated_time - _hours_spent) * _bonus_multiplier / _total_contributors));
+
 	FOR _contributor_id IN
 		SELECT DISTINCT e.id
 		FROM logs AS l JOIN employees AS e ON e.id = l.employee_id
 		WHERE l.project_id = _proj.id
 	LOOP
-		_bonus := LEAST(_max_hours_per_day, FLOOR((_proj.estimated_time - _hours_spent) * _bonus_multiplier / _total_contributors));
 		INSERT INTO logs(employee_id, project_id, work_date, work_hours)
 		VALUES (_contributor_id, _proj.id, CURRENT_DATE, _bonus);
 	END LOOP;
