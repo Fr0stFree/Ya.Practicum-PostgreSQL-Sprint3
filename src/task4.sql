@@ -29,16 +29,7 @@ BEGIN
 		RAISE EXCEPTION 'invalid worked hours provded; expected - 1..24, got - %', p_worked_hours;
 	END IF;
 	
-	CASE
-		WHEN p_worked_hours > 16 THEN
-			_is_suspicious := TRUE;
-		WHEN CURRENT_DATE < p_work_date THEN
-			_is_suspicious := TRUE;
-		WHEN CURRENT_DATE - p_work_date > 7 THEN
-			_is_suspicious := TRUE;
-		ELSE
-			_is_suspicious := FALSE;
-	END CASE;
+	_is_suspicious := p_worked_hours > 16 OR CURRENT_DATE < p_work_date OR CURRENT_DATE - p_work_date > 7;
 	
 	INSERT INTO logs(employee_id, project_id, work_date, work_hours, required_review)
 	VALUES (_empl.id, _proj.id, p_work_date, p_worked_hours, _is_suspicious);
