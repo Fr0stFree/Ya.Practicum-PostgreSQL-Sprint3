@@ -36,7 +36,9 @@ BEGIN
 				DATE_TRUNC('month', l.work_date) AS month,
 				l.required_review
 			FROM logs AS l
-			WHERE l.employee_id = _empl_record.id AND NOT l.is_paid
+			WHERE l.employee_id = _empl_record.id 
+				AND NOT l.is_paid
+				AND l.work_date BETWEEN p_start_date AND p_end_date
 			GROUP BY l.employee_id, DATE_TRUNC('month', l.work_date), l.required_review
 		LOOP
 			IF _work_record.required_review THEN
