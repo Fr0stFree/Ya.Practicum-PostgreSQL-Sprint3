@@ -13,13 +13,12 @@ DECLARE
 	_extra_percent CONSTANT INTEGER := 2;
 BEGIN
 	SELECT AVG(rate) INTO _avg_rate FROM employees;
-	FOR _record IN SELECT id, rate FROM employees LOOP
-		IF _record.rate < _avg_rate THEN
-			_new_rate := FLOOR(_record.rate * ((p_percent + _extra_percent)::NUMERIC/100 + 1));
-		ELSE
-			_new_rate := FLOOR(_record.rate * (p_percent::NUMERIC/100 + 1));
-		END IF;
-		UPDATE employees SET rate = _new_rate WHERE id = _record.id;
-	END LOOP;
+    UPDATE employees
+    SET rate = FLOOR(rate * 
+        CASE 
+            WHEN rate < _avg_rate THEN (p_percent + _extra_percent)::NUMERIC/100 + 1
+            ELSE p_percent::NUMERIC/100 + 1
+        END
+	);
 END;
 $$;
